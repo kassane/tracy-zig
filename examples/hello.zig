@@ -1,5 +1,5 @@
 const std = @import("std");
-const tracy = @import("c.zig");
+const tracy = @import("tracy");
 
 pub fn main() !void {
     const trace = tracy.trace(@src());
@@ -18,4 +18,14 @@ pub fn main() !void {
     try stdout.print("Run `zig build test` to run the tests.\n", .{});
 
     try bw.flush(); // don't forget to flush!
+    _ = std.c.printf("C hello");
+
+    var buf: [8]u8 = undefined;
+    std.crypto.random.bytes(buf[0..]);
+    const seed = std.mem.readIntLittle(u64, buf[0..8]);
+    var r = std.rand.DefaultPrng.init(seed);
+    const w = r.random().int(u32);
+
+    std.time.sleep(1000_000_000 * (w % 5));
+    try main();
 }
