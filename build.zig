@@ -66,13 +66,17 @@ fn libTracy(b: *std.Build, properties: anytype) *std.Build.Step.Compile {
         .optimize = properties[1],
     });
     lib.defineCMacro("TRACY_ENABLE", "1");
+    lib.defineCMacro("TRACY_FIBERS", "1");
     lib.addIncludePath(.{ .path = "dep/tracy.git/public/" });
     lib.addCSourceFile(.{
         .file = .{ .path = "dep/tracy.git/public/TracyClient.cpp" },
         .flags = &.{ "-Wall", "-Wextra", "-Wshadow" },
     });
     lib.pie = true;
-    lib.linkLibCpp();
+    if(lib.target.getAbi() != .msvc)
+        lib.linkLibCpp()
+    else
+        lib.linkLibC();
     lib.step.dependOn(&tracy.step);
     return lib;
 }
